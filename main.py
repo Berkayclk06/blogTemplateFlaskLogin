@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, abort
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import CreatePostForm, RegisterForm, LoginForm
+from functools import wraps
 from flask_gravatar import Gravatar
 import os
 
@@ -50,6 +51,19 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(250), nullable=False)
 
 # db.create_all()
+
+
+# Admin Decorator Func
+def admin_only(function):
+    @wraps(function)
+    def wrapper_function(*args, **kwargs):
+        if not current_user.is_authenticated or (current_user.is_authenticated and current_user.id != 1):
+            abort(403)
+        else:
+            return function(*args, **kwargs)
+    # This line of code renames the wrapper func, it is mainly same as @wraps
+    # wrapper_function.__name__ = function.__name__
+    return wrapper_function
 
 
 @app.route('/')
@@ -115,6 +129,7 @@ def contact():
 
 
 @app.route("/new-post")
+@admin_only
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -133,6 +148,7 @@ def add_new_post():
 
 
 @app.route("/edit-post/<int:post_id>")
+@admin_only
 def edit_post(post_id):
     post = BlogPost.query.get(post_id)
     edit_form = CreatePostForm(
@@ -155,6 +171,7 @@ def edit_post(post_id):
 
 
 @app.route("/delete/<int:post_id>")
+@admin_only
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get(post_id)
     db.session.delete(post_to_delete)
