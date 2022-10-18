@@ -19,6 +19,7 @@ Bootstrap(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# Gravatar
 gravatar = Gravatar(app,
                     size=100,
                     rating='g',
@@ -29,6 +30,7 @@ gravatar = Gravatar(app,
                     base_url=None)
 
 
+# Flask Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -92,6 +94,7 @@ def admin_only(function):
     return wrapper_function
 
 
+# Homepage mainly shows all the posts on page.
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
