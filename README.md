@@ -1,3 +1,6 @@
+## Final version:
+https://berkays-blog.herokuapp.com/
+
 ## Preview of website:
 ![img.png](img.png)
 ![img_1.png](img_1.png)
